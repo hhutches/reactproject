@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #111;
+  color: #eee;
+}
+
+.appShell {
+  min-height: 100vh;
+}
+
+.header {
+  padding: 16px;
+  background: #1c1c1c;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.logo {
+  margin: 0;
+}
+
+.searchInput {
+  padding: 8px;
+  border-radius: 4px;
+  border: none;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 200px 1fr 250px;
+}
+
+.sidebar {
+  background: #181818;
+  padding: 16px;
+}
+
+.nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+.nav li {
+  margin-bottom: 8px;
+}
+
+.main {
+  padding: 16px;
+}
+
+.rightRail {
+  background: #181818;
+  padding: 16px;
+}
+
+.panel {
+  background: #222;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.card {
+  background: #222;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 6px;
+}
