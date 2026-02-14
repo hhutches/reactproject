@@ -1,4 +1,4 @@
-export default function MovieCard({ title, year, rating }) {
+export default function MovieCard({ movie, inWatchlist, onToggleWatchlist }) {
   return (
     <article className="card">
       <div className="poster" aria-hidden="true" />
@@ -6,16 +6,20 @@ export default function MovieCard({ title, year, rating }) {
         <div className="cardTop">
           <div>
             <h3 className="cardTitle">
-              {title} <span className="muted">({year})</span>
+              {movie.title} <span className="muted">({movie.year})</span>
             </h3>
-            <p className="muted">Placeholder description + review preview.</p>
+            <p className="muted">Placeholder synopsis / review preview.</p>
           </div>
-          <div className="rating">★ {rating}</div>
+          <div className="rating">★ {movie.rating.toFixed(1)}</div>
         </div>
 
         <div className="cardActions">
-          <button className="button small">Add to watchlist</button>
-          <button className="button small ghost">Read reviews</button>
+          <button className="button small" onClick={onToggleWatchlist}>
+            {inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+          </button>
+          <button className="button small ghost" type="button">
+            Read reviews
+          </button>
         </div>
       </div>
     </article>

@@ -1,11 +1,26 @@
-export default function Header() {
+export default function Header({ query = "", onQueryChange = () => {}, watchlistCount = 0 }) {
   return (
     <header className="header">
-      <h1 className="logo">Letterboxd Lite</h1>
-      <input
-        className="searchInput"
-        placeholder="Search movies..."
-      />
+      <div className="brand">
+        <div className="logoDot" aria-hidden="true" />
+        <div>
+          <div className="brandName">Letterboxd Lite</div>
+          <div className="muted">Interactive checkpoint</div>
+        </div>
+      </div>
+
+      <div className="search">
+        <input
+          className="searchInput"
+          value={query}
+          onChange={(e) => onQueryChange(e.target.value)}
+          placeholder="Search title, year, rating…"
+        />
+      </div>
+
+      <div className="actions">
+        <div className="pill">Watchlist: {watchlistCount}</div>
+      </div>
     </header>
   );
 }
