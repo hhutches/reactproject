@@ -1,164 +1,223 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "./components/header.jsx";
 import Nav from "./components/nav.jsx";
 import Home from "./pages/Home.jsx";
+import MovieDetail from "./pages/MovieDetail.jsx";
+import WatchlistPage from "./pages/WatchlistPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import FilmsPage from "./pages/FilmsPage.jsx";
+import { getPopularMovies, searchMovies, getMovieDetails } from "./api/tmdb.js";
 import "./styles/App.css";
 
-const INITIAL_MOVIES = [
-  { id: 1, title: "Parasite", year: 2019, rating: 4.5 },
-  { id: 2, title: "Interstellar", year: 2014, rating: 4.3 },
-  { id: 3, title: "The Social Network", year: 2010, rating: 4.1 },
-  { id: 4, title: "Whiplash", year: 2014, rating: 4.4 },
-  { id: 5, title: "Moonlight", year: 2016, rating: 4.2 },
-];
-
-function FilmsPage({ movies, watchlistIds, onToggleWatchlist }) {
-  return (
-    <div className="page">
-      <h2>Films</h2>
-      <p className="muted">Placeholder film browsing page (uses same movie list).</p>
-
-      <div className="grid">
-        {movies.map((m) => (
-          <div key={m.id} className="card">
-            <div className="poster" aria-hidden="true" />
-            <div className="cardBody">
-              <div className="cardTop">
-                <div>
-                  <h3 className="cardTitle">
-                    {m.title} <span className="muted">({m.year})</span>
-                  </h3>
-                  <p className="muted">Placeholder details / genres later.</p>
-                </div>
-                <div className="rating">★ {m.rating.toFixed(1)}</div>
-              </div>
-              <div className="cardActions">
-                <button className="button small" onClick={() => onToggleWatchlist(m.id)}>
-                  {watchlistIds.has(m.id) ? "Remove from watchlist" : "Add to watchlist"}
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function WatchlistPage({ watchlistMovies, onToggleWatchlist }) {
-  return (
-    <div className="page">
-      <h2>Watchlist</h2>
-      <p className="muted">Movies you’ve saved for later.</p>
-
-      <div className="panel">
-        {watchlistMovies.length === 0 ? (
-          <p className="muted">No movies yet. Add some from Home or Films.</p>
-        ) : (
-          <ul className="list">
-            {watchlistMovies.map((m) => (
-              <li key={m.id} className="listItem">
-                <span>
-                  {m.title} <span className="muted">({m.year})</span>
-                </span>
-                <button className="button small ghost" onClick={() => onToggleWatchlist(m.id)}>
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ProfilePage({ watchlistCount }) {
-  return (
-    <div className="page">
-      <h2>Profile</h2>
-      <p className="muted">Placeholder profile page.</p>
-
-      <div className="panel">
-        <p className="muted">Watchlist count: {watchlistCount}</p>
-        <p className="muted">Next: diary entries, ratings, reviews.</p>
-      </div>
-    </div>
-  );
-}
-
 export default function App() {
+  // pages: home | films | watchlist | profile | detail
   const [page, setPage] = useState("home");
+  const [selectedMovieId, setSelectedMovieId] = useState(null);
 
+  // TMDB list/search results
   const [query, setQuery] = useState("");
-  const [sortMode, setSortMode] = useState("popular");
-  const [watchlistIds, setWatchlistIds] = useState(() => new Set());
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  function toggleWatchlist(movieId) {
-    setWatchlistIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(movieId)) next.delete(movieId);
-      else next.add(movieId);
+  // Watchlist stores actual movie objects so it always renders
+  const [watchlistById, setWatchlistById] = useState(() => ({}));
+
+  // ✅ Logged films (Letterboxd “Films” / diary-lite)
+  // logsById[movieId] = { rating: number (0-5), review: string, createdAt: string, movie: object }
+  const [logsById, setLogsById] = useState(() => ({}));
+
+  // Reviews (separate from logs; you can keep this or remove later)
+  const [reviewsByMovie, setReviewsByMovie] = useState(() => ({}));
+
+  function openMovie(movieId) {
+    if (!movieId) return;
+    setSelectedMovieId(movieId);
+    setPage("detail");
+  }
+
+  async function toggleWatchlist(movieOrId) {
+    const id = typeof movieOrId === "object" ? movieOrId.id : movieOrId;
+    if (!id) return;
+
+    setWatchlistById((prev) => {
+      const next = { ...prev };
+      if (next[id]) delete next[id];
+      else next[id] = typeof movieOrId === "object" ? movieOrId : { id, title: "Loading…" };
+      return next;
+    });
+
+    if (typeof movieOrId !== "object") {
+      try {
+        const details = await getMovieDetails(id);
+        setWatchlistById((prev) => ({ ...prev, [id]: details }));
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  // ✅ Log a film (rating + optional review)
+  function logFilm(movieObj, { rating, review }) {
+    if (!movieObj?.id) return;
+    const id = movieObj.id;
+
+    setLogsById((prev) => ({
+      ...prev,
+      [id]: {
+        rating,
+        review: review || "",
+        createdAt: new Date().toISOString(),
+        movie: movieObj, // store enough info to render list
+      },
+    }));
+  }
+
+  function removeLog(movieId) {
+    setLogsById((prev) => {
+      const next = { ...prev };
+      delete next[movieId];
       return next;
     });
   }
 
-  const visibleMovies = useMemo(() => {
-    const q = query.trim().toLowerCase();
-
-    let filtered = INITIAL_MOVIES.filter((m) => {
-      if (!q) return true;
-      return (
-        m.title.toLowerCase().includes(q) ||
-        String(m.year).includes(q) ||
-        String(m.rating).includes(q)
-      );
+  // (optional) if you want separate reviews list still
+  function addReview(movieId, { text, stars }) {
+    if (!movieId) return;
+    setReviewsByMovie((prev) => {
+      const next = { ...prev };
+      const list = next[movieId] ? [...next[movieId]] : [];
+      list.unshift({
+        id: crypto.randomUUID(),
+        text,
+        stars,
+        createdAt: new Date().toISOString(),
+      });
+      next[movieId] = list;
+      return next;
     });
+  }
 
-    filtered.sort((a, b) => {
-      if (sortMode === "title") return a.title.localeCompare(b.title);
-      if (sortMode === "year") return b.year - a.year;
-      return b.rating - a.rating;
-    });
+  // Average rating based on logged films (more “Letterboxd” than reviews)
+  const avgRatingByMovie = useMemo(() => {
+    const out = {};
+    for (const [movieId, entry] of Object.entries(logsById)) {
+      out[movieId] = entry.rating;
+    }
+    return out;
+  }, [logsById]);
 
-    return filtered;
-  }, [query, sortMode]);
+  // Load popular on mount
+  useEffect(() => {
+    let ignore = false;
+    async function run() {
+      setLoading(true);
+      setErrorMsg("");
+      try {
+        const data = await getPopularMovies();
+        if (!ignore) setMovies(data);
+      } catch (e) {
+        if (!ignore) setErrorMsg(e?.message || "Failed to load movies");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    run();
+    return () => { ignore = true; };
+  }, []);
 
-  const watchlistMovies = useMemo(
-    () => INITIAL_MOVIES.filter((m) => watchlistIds.has(m.id)),
-    [watchlistIds]
-  );
+  // Search on query change
+  useEffect(() => {
+    let ignore = false;
+    const t = setTimeout(async () => {
+      setLoading(true);
+      setErrorMsg("");
+      try {
+        const data = query.trim()
+          ? await searchMovies(query.trim())
+          : await getPopularMovies();
+        if (!ignore) setMovies(data);
+      } catch (e) {
+        if (!ignore) setErrorMsg(e?.message || "Failed to load movies");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      ignore = true;
+      clearTimeout(t);
+    };
+  }, [query]);
+
+  const watchlistMovies = useMemo(() => Object.values(watchlistById), [watchlistById]);
+  const loggedFilms = useMemo(() => Object.values(logsById), [logsById]);
 
   let mainContent = null;
+
   if (page === "home") {
     mainContent = (
       <Home
-        movies={visibleMovies}
-        query={query}
-        sortMode={sortMode}
-        onSortChange={setSortMode}
-        watchlistIds={watchlistIds}
+        movies={movies}
+        loading={loading}
+        errorMsg={errorMsg}
+        onOpenMovie={openMovie}
+        watchlistById={watchlistById}
         onToggleWatchlist={toggleWatchlist}
-        watchlistMovies={watchlistMovies}
+        avgRatingByMovie={avgRatingByMovie}
+        mode={page}
       />
     );
   } else if (page === "films") {
     mainContent = (
       <FilmsPage
-        movies={visibleMovies}
-        watchlistIds={watchlistIds}
-        onToggleWatchlist={toggleWatchlist}
+        logs={loggedFilms}
+        onOpenMovie={openMovie}
+        onRemoveLog={removeLog}
       />
     );
   } else if (page === "watchlist") {
     mainContent = (
       <WatchlistPage
-        watchlistMovies={watchlistMovies}
-        onToggleWatchlist={toggleWatchlist}
+        movies={watchlistMovies}
+        onOpenMovie={openMovie}
+        onRemove={(id) => toggleWatchlist(id)}
       />
     );
+  } else if (page === "detail") {
+    if (!selectedMovieId) {
+      mainContent = (
+        <div className="page">
+          <h2>Movie</h2>
+          <p className="muted">No movie selected.</p>
+          <button className="button" onClick={() => setPage("home")}>
+            Back to Home
+          </button>
+        </div>
+      );
+    } else {
+      const inWatchlist = !!watchlistById[selectedMovieId];
+      const existingLog = logsById[selectedMovieId] || null;
+
+      mainContent = (
+        <MovieDetail
+          movieId={selectedMovieId}
+          inWatchlist={inWatchlist}
+          onToggleWatchlist={() => toggleWatchlist(selectedMovieId)}
+          onBack={() => setPage("home")}
+
+          // ✅ logging feature
+          existingLog={existingLog}
+          onLogFilm={(movieObj, payload) => logFilm(movieObj, payload)}
+
+          // optional reviews
+          reviews={reviewsByMovie[selectedMovieId] || []}
+          onAddReview={(payload) => addReview(selectedMovieId, payload)}
+        />
+      );
+    }
   } else {
-    mainContent = <ProfilePage watchlistCount={watchlistIds.size} />;
+    mainContent = <ProfilePage />;
   }
 
   return (
@@ -166,29 +225,30 @@ export default function App() {
       <Header
         query={query}
         onQueryChange={setQuery}
-        watchlistCount={watchlistIds.size}
+        watchlistCount={watchlistMovies.length}
       />
 
       <div className="layout">
         <aside className="sidebar">
-          <Nav currentPage={page} onNavigate={setPage} />
+          <Nav
+            currentPage={page}
+            onNavigate={(next) => {
+              setPage(next);
+              if (next !== "detail") setSelectedMovieId(null);
+            }}
+          />
         </aside>
 
         <main className="main">{mainContent}</main>
 
         <aside className="rightRail">
           <div className="panel">
-            <h3 className="panelTitle">Quick Stats</h3>
-            <p className="muted">Movies shown: {visibleMovies.length}</p>
-            <p className="muted">Watchlist: {watchlistIds.size}</p>
-            <p className="muted">Current page: {page}</p>
+            <h3 className="panelTitle">Stats</h3>
+            <p className="muted">Logged films: {loggedFilms.length}</p>
+            <p className="muted">Watchlist: {watchlistMovies.length}</p>
           </div>
         </aside>
       </div>
-
-      <footer className="footer">
-        <span className="muted">ReactProject — Interactive Checkpoint</span>
-      </footer>
     </div>
   );
 }

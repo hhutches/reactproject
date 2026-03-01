@@ -222,3 +222,80 @@ body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial
 .navButton.active {
   border-color: #66e6a3;
 }
+
+.posterButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.posterImg {
+  width: 64px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.posterFallback {
+  width: 64px;
+  height: 96px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0b0f13;
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.detailPoster {
+  width: 200px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.detailPosterFallback {
+  width: 200px;
+  height: 300px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #0b0f13;
+}
+
+.detailActions { margin: 12px 0; }
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  outline: none;
+  resize: vertical;
+}
+
+.reviewList { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.reviewItem { padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: #111820; }
+.reviewMeta { margin-bottom: 6px; }
+
+.linkButton {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+.linkButton:hover { text-decoration: underline; }

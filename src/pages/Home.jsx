@@ -1,80 +1,77 @@
-import MovieCard from "../components/MovieCard.jsx";
-import Section from "../components/section.jsx";
+import { tmdbPoster } from "../api/tmdb.js";
 
 export default function Home({
   movies = [],
-  query = "",
-  sortMode = "popular",
-  onSortChange = () => {},
-  watchlistIds = new Set(),
+  loading = false,
+  errorMsg = "",
+  onOpenMovie = () => {},
+  watchlistById = {},          // ✅ THIS fixes the undefined reference
   onToggleWatchlist = () => {},
-  watchlistMovies = [],
+  avgRatingByMovie = {},
+  mode = "home",
 }) {
   return (
     <div className="page">
-      <Section
-        title="Home"
-        subtitle="Core flow: search → read reviews → add to watchlist"
-      >
-        <div className="controls">
-          <div className="controlGroup">
-            <label className="controlLabel" htmlFor="sort">
-              Sort
-            </label>
-            <select
-              id="sort"
-              className="select"
-              value={sortMode}
-              onChange={(e) => onSortChange(e.target.value)}
-            >
-              <option value="popular">Popular (rating)</option>
-              <option value="title">Title (A–Z)</option>
-              <option value="year">Year (newest)</option>
-            </select>
-          </div>
+      <h2>{mode === "home" ? "Popular" : "Films"}</h2>
+      <p className="muted">
+        {mode === "home"
+          ? "Popular movies (TMDB) — search above to find any movie."
+          : "Browse/search movies (TMDB)."}
+      </p>
 
-          <div className="muted">
-            {query.trim()
-              ? `Results for “${query.trim()}”: ${movies.length}`
-              : `Showing: ${movies.length}`}
-          </div>
-        </div>
+      {errorMsg ? <p className="muted">{errorMsg}</p> : null}
+      {loading ? <p className="muted">Loading…</p> : null}
 
-        <div className="grid">
-          {movies.map((m) => (
-            <MovieCard
-              key={m.id}
-              movie={m}
-              inWatchlist={watchlistIds.has(m.id)}
-              onToggleWatchlist={() => onToggleWatchlist(m.id)}
-            />
-          ))}
-        </div>
-      </Section>
+      <div className="grid">
+        {movies.map((m) => {
+          const year = m.release_date ? m.release_date.slice(0, 4) : "—";
+          const poster = tmdbPoster(m.poster_path);
+          const avg = avgRatingByMovie?.[m.id];
+          const inWatchlist = !!watchlistById?.[m.id];
 
-      <Section title="Watchlist Preview" subtitle="Updates via state + click events">
-        <div className="panel">
-          {watchlistMovies.length === 0 ? (
-            <p className="muted">Your watchlist is empty. Add a movie above.</p>
-          ) : (
-            <ul className="list">
-              {watchlistMovies.map((m) => (
-                <li key={m.id} className="listItem">
-                  <span>
-                    {m.title} <span className="muted">({m.year})</span>
-                  </span>
-                  <button
-                    className="button small ghost"
-                    onClick={() => onToggleWatchlist(m.id)}
-                  >
-                    Remove
+          return (
+            <article className="card" key={m.id}>
+              <button
+                className="posterButton"
+                type="button"
+                onClick={() => onOpenMovie(m.id)}
+                aria-label={`Open ${m.title}`}
+              >
+                {poster ? (
+                  <img className="posterImg" src={poster} alt={`${m.title} poster`} />
+                ) : (
+                  <div className="posterFallback" />
+                )}
+              </button>
+
+              <div className="cardBody">
+                <div className="cardTop">
+                  <div>
+                    <h3 className="cardTitle">
+                      {m.title} <span className="muted">({year})</span>
+                    </h3>
+                    <p className="muted">
+                      {m.overview ? m.overview.slice(0, 90) + "…" : "No overview available."}
+                    </p>
+                    <p className="muted">
+                      Your avg rating: {avg ? avg.toFixed(1) : "—"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="cardActions">
+                  <button className="button small" onClick={() => onToggleWatchlist(m)}>
+                    {inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
                   </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </Section>
+                  <button className="button small ghost" onClick={() => onOpenMovie(m.id)}>
+                    Read reviews
+                  </button>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
