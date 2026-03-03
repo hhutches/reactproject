@@ -76,8 +76,6 @@ export default function MovieDetail({
         if (!ignore) {
           setMovie(details);
           setTrailerKey(trailer);
-
-          // ✅ Keep MANY cast members so scrolling/arrows actually matter
           setCast((credits?.cast || []).slice(0, 20));
         }
       } catch (e) {
@@ -107,7 +105,6 @@ export default function MovieDetail({
     };
   }, [cast.length]);
 
-  // Optional: hide the entire cast section if there's truly no cast
   const hasCast = useMemo(() => cast && cast.length > 0, [cast]);
 
   if (!movieId) return <p className="muted">No movie selected.</p>;
@@ -134,7 +131,8 @@ export default function MovieDetail({
         </div>
 
         <div className="detailRight">
-          <h2>
+          {/* ✅ keep title readable + consistent (white, bold via h2 styling / global h2 color) */}
+          <h2 className="detailTitle">
             {movie.title} <span className="muted">({year})</span>
           </h2>
 
@@ -148,7 +146,7 @@ export default function MovieDetail({
 
           {/* 🎬 Trailer */}
           <hr className="divider" />
-          <h3>Trailer</h3>
+          <h3 className="sectionTitle">Trailer</h3>
           {trailerKey ? (
             <div className="trailerWrap" style={{ marginTop: 10 }}>
               <iframe
@@ -163,7 +161,7 @@ export default function MovieDetail({
 
           {/* ⭐ Log Film */}
           <hr className="divider" />
-          <h3>Log this film</h3>
+          <h3 className="sectionTitle">Log this film</h3>
           <p className="muted">
             Click stars to rate (click the same star again for a half-star) and optionally add a review.
           </p>
@@ -199,7 +197,7 @@ export default function MovieDetail({
 
           {/* 📝 Reviews */}
           <hr className="divider" />
-          <h3>Reviews</h3>
+          <h3 className="sectionTitle">Reviews</h3>
 
           {reviews.length === 0 ? (
             <p className="muted">No reviews yet.</p>
@@ -226,9 +224,9 @@ export default function MovieDetail({
             </button>
           </div>
 
-          {/* 🎭 Cast (bottom, scrollable, arrows both ways) */}
+          {/* 🎭 Cast */}
           <hr className="divider" />
-          <h3>Cast</h3>
+          <h3 className="sectionTitle">Cast</h3>
 
           {hasCast ? (
             <div className="castSection">
@@ -251,7 +249,6 @@ export default function MovieDetail({
                 })}
               </div>
 
-              {/* Left arrow (only if you can scroll left) */}
               {canScrollLeft ? (
                 <button
                   type="button"
@@ -264,7 +261,6 @@ export default function MovieDetail({
                 </button>
               ) : null}
 
-              {/* Right arrow (only if you can scroll right) */}
               {canScrollRight ? (
                 <button
                   type="button"

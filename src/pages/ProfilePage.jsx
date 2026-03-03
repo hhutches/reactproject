@@ -1,104 +1,156 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const KEY = "lb_profile_v1";
-
-function loadProfile() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    return raw
-      ? JSON.parse(raw)
-      : { displayName: "", username: "", bio: "", photoDataUrl: "" };
-  } catch {
-    return { displayName: "", username: "", bio: "", photoDataUrl: "" };
-  }
-}
-
-export default function ProfilePage() {
-  const [profile, setProfile] = useState(loadProfile);
-  const [savedMsg, setSavedMsg] = useState("");
+export default function ProfilePage({
+  profile,
+  onUpdateProfile = () => {},
+  onGoHome = () => {},
+  onLogout = () => {},
+}) {
+  const [name, setName] = useState(profile?.name ?? "");
+  const [username, setUsername] = useState(profile?.username ?? "");
+  const [bio, setBio] = useState(profile?.bio ?? "");
+  const [photo, setPhoto] = useState(profile?.photo ?? "");
+  const fileRef = useRef(null);
 
   useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify(profile));
+    setName(profile?.name ?? "");
+    setUsername(profile?.username ?? "");
+    setBio(profile?.bio ?? "");
+    setPhoto(profile?.photo ?? "");
   }, [profile]);
 
-  function onPhotoChange(e) {
+  function pickPhoto() {
+    fileRef.current?.click();
+  }
+
+  function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = () => {
-      setProfile((p) => ({ ...p, photoDataUrl: String(reader.result || "") }));
+      const dataUrl = String(reader.result || "");
+      setPhoto(dataUrl);
+      onUpdateProfile({
+        ...(profile || {}),
+        name: name.trim(),
+        username: (username || "").trim(),
+        bio,
+        photo: dataUrl,
+      });
     };
     reader.readAsDataURL(file);
+    e.target.value = "";
   }
 
-  function saveNow() {
-    localStorage.setItem(KEY, JSON.stringify(profile));
-    setSavedMsg("Saved!");
-    setTimeout(() => setSavedMsg(""), 1200);
+  function save() {
+    const cleanName = name.trim();
+    const cleanUser = (username || "").trim();
+    if (!cleanName || !cleanUser) return;
+
+    onUpdateProfile({
+      ...(profile || {}),
+      name: cleanName,
+      username: cleanUser,
+      bio,
+      photo,
+    });
   }
 
   return (
-    <div className="page">
-      <h2>Profile</h2>
-      <p className="muted">Edit your profile settings (stored locally for now).</p>
+    <div className="page profilePage">
+      <div className="pageHead">
+        <div>
+          <h2>Profile</h2>
+          <p className="muted">
+            Update your profile. Click <b>Save</b> to apply changes.
+          </p>
+        </div>
 
-      <div className="panel">
-        <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 16, alignItems: "start" }}>
-          <div>
-            {profile.photoDataUrl ? (
-              <img
-                src={profile.photoDataUrl}
-                alt="Profile"
-                style={{ width: 120, height: 120, borderRadius: 16, objectFit: "cover", border: "1px solid var(--border)" }}
-              />
-            ) : (
-              <div
-                style={{ width: 120, height: 120, borderRadius: 16, background: "#0b0f13", border: "1px solid var(--border)" }}
-                aria-label="No profile photo"
-              />
-            )}
+        <button className="button ghost" type="button" onClick={onGoHome}>
+          ← Back to Home
+        </button>
+      </div>
 
-            <div style={{ marginTop: 10 }}>
-              <input type="file" accept="image/*" onChange={onPhotoChange} />
-            </div>
+      <div className="panel profilePanel">
+        <div className="profileGrid">
+          <div className="profileAvatarCol">
+            <button
+              type="button"
+              className="profileAvatarBtn"
+              onClick={pickPhoto}
+              aria-label="Change profile photo"
+              title="Click to change photo"
+            >
+              {photo ? (
+                <img className="profileAvatarImg" src={photo} alt="Profile" />
+              ) : (
+                <div className="profileAvatarFallback" />
+              )}
+              <div className="profileAvatarOverlay">Change</div>
+            </button>
+
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFile}
+              style={{ display: "none" }}
+            />
+
+            <p className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+              Click the image to upload a new one.
+            </p>
           </div>
 
-          <div style={{ display: "grid", gap: 10 }}>
-            <label className="muted">
-              Display name
+          <div className="profileFields">
+            <div className="profileRow">
+              <label className="controlLabel">Name</label>
               <input
-                className="searchInput"
-                value={profile.displayName}
-                onChange={(e) => setProfile((p) => ({ ...p, displayName: e.target.value }))}
-                placeholder="Henry Hutcheson"
+                className="select"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                autoComplete="name"
               />
-            </label>
+            </div>
 
-            <label className="muted">
-              Username
+            <div className="profileRow">
+              <label className="controlLabel">Username</label>
               <input
-                className="searchInput"
-                value={profile.username}
-                onChange={(e) => setProfile((p) => ({ ...p, username: e.target.value }))}
-                placeholder="@hhutches"
+                className="select"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="username"
+                autoComplete="username"
               />
-            </label>
+            </div>
 
-            <label className="muted">
-              Bio
+            <div className="profileRow">
+              <label className="controlLabel">Bio</label>
               <textarea
                 className="textarea"
-                value={profile.bio}
-                onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))}
-                placeholder="Movie lover. Favorites: …"
-                rows={4}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Write a short bio…"
+                rows={5}
               />
-            </label>
+            </div>
 
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <button className="button" onClick={saveNow}>Save profile</button>
-              {savedMsg ? <span className="muted">{savedMsg}</span> : null}
+            <div className="profileActions">
+              <button className="button" type="button" onClick={save}>
+                Save
+              </button>
+              <button className="button ghost" type="button" onClick={onLogout}>
+                Log out
+              </button>
+
+              <span className="muted" style={{ marginLeft: 8 }}>
+                Signed in as{" "}
+                <b style={{ color: "rgba(255,255,255,0.85)" }}>
+                  @{profile?.username}
+                </b>
+              </span>
             </div>
           </div>
         </div>

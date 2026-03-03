@@ -863,3 +863,764 @@ body {
   gap: 14px;
   align-items: flex-start;
 }
+
+/* ===============================
+   LOGIN — make it actually aesthetic
+================================ */
+
+.loginPage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  background: radial-gradient(1200px 700px at 30% 10%, rgba(102,230,163,0.12), transparent 60%),
+              radial-gradient(900px 600px at 80% 20%, rgba(80,160,255,0.10), transparent 55%),
+              var(--bg);
+}
+
+.loginCard {
+  width: min(760px, 92vw);
+  padding: 28px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: rgba(15, 22, 32, 0.72);
+  box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+  backdrop-filter: blur(10px);
+}
+
+/* top hero area */
+.loginHero {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.loginLogoDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #66e6a3;
+  box-shadow: 0 0 0 6px rgba(102,230,163,0.10);
+}
+
+.loginTitle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  font-size: clamp(34px, 4vw, 54px);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  color: rgba(255,255,255,0.92);
+  margin: 2px 0 0;
+}
+
+.bounceWord {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+  animation: bounceIn 720ms cubic-bezier(.2, .9, .2, 1) forwards;
+}
+
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: translateY(18px) scale(0.98); }
+  60%  { opacity: 1; transform: translateY(-7px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.loginSub {
+  font-size: 15px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* form reveal */
+.loginForm {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 240ms ease, transform 240ms ease;
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.loginForm.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.loginRow {
+  display: grid;
+  gap: 8px;
+}
+
+.loginLabel {
+  font-size: 13px;
+  color: rgba(255,255,255,0.72);
+}
+
+.loginInput {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(17, 26, 38, 0.75);
+  color: rgba(255,255,255,0.92);
+  outline: none;
+}
+
+.loginInput::placeholder {
+  color: rgba(255,255,255,0.35);
+}
+
+.loginInput:focus {
+  border-color: rgba(102,230,163,0.55);
+  box-shadow: 0 0 0 6px rgba(102,230,163,0.10);
+}
+
+/* photo layout */
+.loginPhotoRow {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.loginAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.22);
+  overflow: hidden;
+}
+
+.loginAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.loginAvatarFallback {
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.18);
+}
+
+.loginPhotoInputs {
+  display: grid;
+  gap: 10px;
+}
+
+.loginFileRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.loginFileRow input[type="file"] {
+  color: rgba(255,255,255,0.72);
+  font-size: 13px;
+}
+
+/* button */
+.loginBtn {
+  margin-top: 4px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(102,230,163,0.38);
+  background: rgba(102,230,163,0.16);
+  color: rgba(255,255,255,0.92);
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease, background 120ms ease;
+}
+
+.loginBtn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  background: rgba(102,230,163,0.20);
+}
+
+.loginBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* mobile tighten */
+@media (max-width: 560px) {
+  .loginCard { padding: 20px; border-radius: 20px; }
+  .loginPhotoRow { grid-template-columns: 84px 1fr; }
+  .loginAvatar { width: 84px; height: 84px; border-radius: 18px; }
+}
+
+.brandButton{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  background:transparent;
+  border:none;
+  color:inherit;
+  padding:0;
+  cursor:pointer;
+  text-align:left;
+}
+.brandButton:hover { filter: brightness(1.08); }
+.brandText { display:grid; gap:2px; }
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.star { font-size: 16px; line-height: 1; }
+.starEmpty { color: rgba(255,255,255,0.18); }
+.starFull { color: rgba(255,255,255,0.72); }
+
+/* simple half-star effect (left half filled) */
+.starHalf {
+  color: rgba(255,255,255,0.18);
+  position: relative;
+  display: inline-block;
+}
+.starHalf::before {
+  content: "★";
+  position: absolute;
+  left: 0;
+  width: 50%;
+  overflow: hidden;
+  color: rgba(255,255,255,0.72);
+}
+
+/* ================================
+   Scoped card layout fixes
+   (ONLY affects Films + Watchlist)
+================================ */
+
+/* 1-column wide grid only for those pages */
+.grid.gridWide {
+  grid-template-columns: 1fr !important;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+/* ONLY cards inside gridWide should be wide cards */
+.grid.gridWide .card {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+}
+
+/* poster stays left in wide cards */
+.grid.gridWide .posterButton {
+  justify-self: start;
+  align-self: start;
+}
+
+/* prevent right column overflow */
+.grid.gridWide .cardBody {
+  min-width: 0;
+}
+
+/* poster sizing only in wide cards */
+.grid.gridWide .posterImg,
+.grid.gridWide .posterFallback {
+  width: 96px;
+  height: 144px;
+  border-radius: 12px;
+}
+
+.grid.gridWide .posterImg { object-fit: cover; }
+
+.loginInput {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  outline: none;
+}
+
+/* Titles on pages */
+.pageTitle {
+  font-size: 44px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: rgba(255,255,255,0.96);
+}
+
+/* Make Films/Watchlist cards match Home sizing */
+.card--tight {
+  position: relative;
+}
+
+/* Date in top-right (inside the card) */
+.cardMetaTopRight {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 12px;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* Keep your text from looking “black bold” */
+.cardTitle {
+  color: rgba(255,255,255,0.92);
+  font-size: 18px;
+  font-weight: 650;
+  margin: 0 0 6px;
+}
+
+/* thinner description text */
+.thinText {
+  font-weight: 300;
+  line-height: 1.35;
+}
+
+/* Rating row always one line */
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.ratingLabel {
+  min-width: 92px;
+}
+
+.ratingNumber {
+  margin-left: 6px;
+}
+
+/* STAR SYSTEM: all 5 stars always present, aligned, with half fill */
+.stars {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  line-height: 1;
+}
+
+.star {
+  font-size: 18px;
+  color: rgba(0,0,0,0.75); /* "black" empty star */
+}
+
+.star.filled {
+  color: rgba(180,190,200,0.95); /* grey filled */
+}
+
+/* Half star: left half grey, right half black */
+.star.half {
+  position: relative;
+  color: rgba(0,0,0,0.75);
+}
+
+.star.half::before {
+  content: "★";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%;
+  overflow: hidden;
+  color: rgba(180,190,200,0.95);
+}
+
+/* Ensure headings never go "default black" */
+h1, h2, h3, h4 { color: var(--text); }
+
+/* Page header row (used in Profile above) */
+.pageHead{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+.pageTitle{
+  margin:0;
+  font-size:42px; /* matches your Films/Watchlist vibe */
+  letter-spacing:-0.5px;
+}
+
+/* Profile layout */
+.profilePanel { padding: 16px; }
+.profileGrid{
+  display:grid;
+  grid-template-columns: 220px 1fr;
+  gap: 18px;
+  align-items:start;
+}
+.profileAvatarBtn{
+  width: 200px;
+  height: 200px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: #0b0f13;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+.profileAvatarImg{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.profileAvatarFallback{
+  width:100%;
+  height:100%;
+  background:#0b0f13;
+}
+.profileAvatarOverlay{
+  position:absolute;
+  inset:auto 10px 10px 10px;
+  padding:8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.92);
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  backdrop-filter: blur(6px);
+}
+.profileAvatarBtn:hover .profileAvatarOverlay{ opacity: 1; }
+
+.profileFields{
+  max-width: 820px; /* keeps it symmetrical instead of stretching to the edge */
+  width: 100%;
+}
+.profileRow{ margin-bottom: 12px; }
+.profileActions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+/* Mobile: stack nicely */
+@media (max-width: 900px){
+  .profileGrid{ grid-template-columns: 1fr; }
+  .profileAvatarBtn{ width: 160px; height: 160px; }
+}
+
+.detailTitle{
+  margin: 0 0 6px;
+  font-size: 34px;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.detailRight h3 { color: var(--text); font-weight: 700; }
+
+/* ===============================
+   Profile page polish
+   (paste at END of App.css)
+================================ */
+
+/* 1) Make Profile header match other page headers */
+.profilePage h2,
+.profilePage .pageTitle {
+  font-size: 40px;            /* match your other big headers */
+  line-height: 1.05;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+
+.profilePage .pageSub,
+.profilePage > .muted,
+.profilePage p.muted {
+  font-size: 18px;            /* same feel as other pages */
+}
+
+/* 2) Keep the profile form symmetric and stop "Bio" from stretching */
+.profilePanel {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 680px); /* left avatar + fixed-ish form column */
+  gap: 22px;
+  align-items: start;
+}
+
+/* Ensure the form column doesn't become full-width */
+.profilePanelRight {
+  width: 100%;
+  max-width: 680px;
+}
+
+/* Make inputs/textarea obey the column width */
+.profilePanelRight input,
+.profilePanelRight textarea {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Just in case some element is forcing overflow */
+.profilePanel,
+.profilePanelRight {
+  min-width: 0;
+}
+
+/* ===============================
+   Profile layout: wider + better use of space
+   (paste at END of App.css)
+================================ */
+
+/* Make the whole profile panel use more of the page */
+.profilePanel {
+  width: min(1240px, 100%);
+  margin-inline: auto;
+}
+
+/* Wider right column overall */
+.profilePanel {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 860px); /* bigger form column */
+  gap: 26px;
+  align-items: start;
+}
+
+/* Let the right side actually grow */
+.profilePanelRight {
+  width: 100%;
+  max-width: 860px;
+}
+
+/* Inputs should be wider than before, but not full-bleed */
+.profilePanelRight input {
+  width: 100%;
+  max-width: 520px; /* name + username not as wide as bio */
+}
+
+/* Bio can go further right */
+.profilePanelRight textarea {
+  width: 100%;
+  max-width: 860px; /* bio uses full right column */
+}
+
+/* Safety: avoid weird overflow constraints */
+.profilePanel,
+.profilePanelRight {
+  min-width: 0;
+}
+
+/* ===== Page headers (force consistent heading look) ===== */
+
+.pageHead .pageTitle {
+  margin: 0;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 56px;       /* matches your Films/Watchlist big header vibe */
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+/* In case any global styles are turning headings dark */
+.page h1, .page h2, .page h3 {
+  color: var(--text);
+}
+
+/* =========================
+   PROFILE FIX ONLY
+   (paste at very bottom)
+========================= */
+
+/* Force Profile header to match other page headers */
+.page > h2,
+.pageHead h2 {
+  color: var(--text) !important;
+  font-weight: 700 !important;
+}
+
+/* If something is making headings black globally, this fixes it inside pages */
+.page h1, .page h2, .page h3 {
+  color: var(--text) !important;
+}
+
+/* Make the profile panel actually use the available width */
+.profilePanel {
+  width: 100%;
+  max-width: 1100px;     /* feel free to bump to 1200px */
+  margin-left: 0;        /* don't center it if you want to use space */
+  margin-right: 0;
+}
+
+/* Two-column layout: avatar column + fields column (fields should expand) */
+.profileGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+/* Let the right side fill space (this is usually what’s causing the blank area) */
+.profileFields {
+  width: 100%;
+  max-width: none !important;
+  min-width: ;
+}
+
+/* Inputs/textarea should stretch */
+.profileFields .select,
+.profileFields .textarea {
+  width: 100%;
+  max-width: none !important;
+}
+
+/* Bio should be wider + not look cramped */
+.profileFields .textarea {
+  min-height: 140px;
+}
+
+/* Prevent any weird overflow clipping that makes things look cut-off */
+.profilePanel,
+.profileFields,
+.profileGrid {
+  overflow: visible;
+}
+
+/* =========================
+   PROFILE LAYOUT HARD FIX
+   (paste at very bottom)
+========================= */
+
+.profilePanel { width: 100%; }
+
+.profileGrid{
+  display: grid;
+  grid-template-columns: 340px minmax(520px, 1fr); /* prevents the right side from collapsing */
+  gap: 28px;
+  align-items: start;
+}
+
+.profileAvatarCol{ min-width: 0; }
+.profileFields{
+  min-width: 520px;   /* key */
+  width: 100%;
+  max-width: none;
+}
+
+.profileRow{
+  width: 100%;
+  max-width: 820px;   /* keeps it looking nice instead of spanning 3000px */
+}
+
+.profileFields .select,
+.profileFields .textarea{
+  display: block;
+  width: 100% !important;
+  max-width: 820px !important;
+  min-width: 520px;   /* key */
+}
+
+.profileFields .textarea{
+  min-height: 160px;
+  resize: vertical;
+}
+
+/* Mobile fallback */
+@media (max-width: 980px){
+  .profileGrid{
+    grid-template-columns: 1fr;
+  }
+  .profileFields,
+  .profileFields .select,
+  .profileFields .textarea{
+    min-width: 0;
+    max-width: 100% !important;
+  }
+}
+
+
+
+/* ===== PROFILE: lock the panel width so it stops stretching ===== */
+.page.profilePage {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.profilePanel {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* two-column layout that doesn't get weird */
+.profileGrid {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+/* avatar sizing (so it doesn't become a giant blank block) */
+.profileAvatarBtn {
+  width: 320px;
+  height: 320px;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+  background: #0b0f13;
+  padding: 0;
+}
+
+.profileAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* keep the fields from overflowing / shrinking oddly */
+.profileFields {
+  min-width: 0;
+  max-width: 720px; /* THIS is the “stop where the photo would stop” */
+}
+
+.profileRow .select,
+.profileRow .textarea {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* keep actions on one line */
+.profileActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ===== Profile actions: move left and align properly ===== */
+.profileActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;   /* force left */
+  gap: 14px;
+  margin-top: 16px;
+  flex-wrap: nowrap;             /* stop stacking vertically */
+}
+
+.profileActions .button {
+  margin: 0;
+}
+
+.profileActions .muted {
+  margin-left: 12px;
+  white-space: nowrap;
+}
