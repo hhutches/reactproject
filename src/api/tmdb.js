@@ -110,3 +110,16 @@ export async function getMovieTrailer(movieId) {
 
   return trailer ? trailer.key : null; // key = YouTube ID
 }
+
+export function tmdbProfile(path, size = "w185") {
+  return path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
+}
+
+export async function getMovieCredits(movieId) {
+  assertKey();
+  const res = await fetch(
+    `${BASE}/movie/${movieId}/credits?api_key=${API_KEY}&language=en-US`
+  );
+  if (!res.ok) throw new Error("Failed to fetch movie credits");
+  return await res.json(); // { cast: [...], crew: [...] }
+}

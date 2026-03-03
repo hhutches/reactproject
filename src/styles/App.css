@@ -1,9 +1,63 @@
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #111;
-  color: #eee;
+:root {
+  --bg: #0d1117;
+  --panel: #0f1620;
+  --panel-2: #111a26;
+  --border: rgba(255, 255, 255, 0.10);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.65);
 }
+
+/* ===============================
+   Graphik Compact (Trial)
+================================ */
+
+@font-face {
+  font-family: "Graphik";
+  src: url("../assets/fonts/Graphik-Regular-Trial.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Graphik";
+  src: url("../assets/fonts/Graphik-Medium-Trial.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Graphik";
+  src: url("../assets/fonts/Graphik-Semibold-Trial.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Graphik";
+  src: url("../assets/fonts/Graphik-Bold-Trial.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Graphik";
+  src: url("../assets/fonts/Graphik-Light-Trial.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+html, body {
+  height: 100%;
+}
+
+
+
+
 
 .appShell {
   min-height: 100vh;
@@ -77,8 +131,7 @@ body {
   --border: #22303a;
 }
 
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); }
+
 
 .muted { color: var(--muted); }
 
@@ -299,3 +352,514 @@ body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial
   padding: 0;
 }
 .linkButton:hover { text-decoration: underline; }
+
+.navButton {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.navButton:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.navButton.active {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(102, 230, 163, 0.6);
+}
+
+/* App layout backgrounds */
+.appShell {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.layout {
+  background: var(--bg);
+}
+
+/* Sidebar + right rail should NOT have random backgrounds */
+.sidebar,
+.rightRail {
+  background: transparent;
+}
+
+/* The actual boxes should match */
+.nav,
+.panel,
+.card,
+.footer,
+.header {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+/* Optional: make the stats box slightly different but still consistent */
+.rightRail .panel {
+  background: var(--panel-2);
+}
+
+/* Text helpers */
+.muted {
+  color: var(--muted);
+}
+
+.castRow {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.castCard {
+  min-width: 110px;
+  max-width: 110px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.castImg {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.castImgFallback {
+  width: 100%;
+  height: 140px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #0b0f13;
+}
+
+.castName {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.castRole {
+  font-size: 12px;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
+/* Prevent any child from forcing horizontal overflow on the whole page */
+.page, .main, .detailRight {
+  overflow-x: hidden;
+}
+
+/* Keep iframe responsive and stable */
+.trailerWrap {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0b0f13;
+}
+
+.trailerWrap iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
+/* Cast strip: scrolls horizontally without affecting layout */
+.castSection {
+  position: relative;
+}
+
+.castRow {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px 6px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* Hide scrollbar (optional, looks cleaner) */
+.castRow::-webkit-scrollbar {
+  height: 8px;
+}
+.castRow::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+}
+
+/* Arrow overlay button appears on hover */
+.castScrollBtn {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.92);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+  backdrop-filter: blur(6px);
+}
+
+.castSection:hover .castScrollBtn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.castScrollBtn:hover {
+  background: rgba(0,0,0,0.5);
+}
+
+/* Keep cast cards from shrinking weirdly */
+.castCard {
+  flex: 0 0 110px;
+}
+
+.castScrollBtn.left {
+  left: 4px;
+  right: auto;
+}
+
+.castScrollBtn.right {
+  right: 4px;
+  left: auto;
+}
+
+.castSection { position: relative; }
+
+.castScrollBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.92);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+  backdrop-filter: blur(6px);
+}
+
+.castSection:hover .castScrollBtn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.castScrollBtn.left { left: 4px; }
+.castScrollBtn.right { right: 4px; }
+
+.castRow {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* 🔥 critical: give space at the end so last card can scroll fully into view */
+  padding: 10px 56px 10px 6px;
+
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+
+  /* 🔥 prevents "half-cut" stops */
+  scroll-snap-type: x mandatory;
+}
+
+.castCard {
+  flex: 0 0 110px;
+  scroll-snap-align: start;
+}
+
+/* optional: makes arrows not cover the first/last card */
+.castSection {
+  position: relative;
+  padding-left: 44px;
+  padding-right: 44px;
+}
+
+/* Cast container */
+.castSection {
+  position: relative;
+  padding: 0 48px; /* space so arrows don't overlap cards */
+}
+
+/* Scroll row */
+.castRow {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding: 10px 0;
+
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+
+  /* hide scrollbar everywhere */
+  scrollbar-width: none; /* Firefox */
+}
+
+.castRow::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Cards */
+.castCard {
+  flex: 0 0 110px;
+  scroll-snap-align: start;
+}
+
+/* ===== Gradient Fades ===== */
+
+.castSection::before,
+.castSection::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 64px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.castSection::before {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--bg) 0%,
+    rgba(13, 17, 23, 0.85) 40%,
+    rgba(13, 17, 23, 0) 100%
+  );
+}
+
+.castSection::after {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--bg) 0%,
+    rgba(13, 17, 23, 0.85) 40%,
+    rgba(13, 17, 23, 0) 100%
+  );
+}
+
+/* ===== Arrow Buttons ===== */
+
+.castScrollBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 150ms ease;
+  z-index: 3;
+}
+
+.castScrollBtn:hover {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.castScrollBtn.left {
+  left: 6px;
+}
+
+.castScrollBtn.right {
+  right: 6px;
+}
+
+
+
+html, body {
+  font-family: "Graphik", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+  font-weight: 400;
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+}
+
+.brandName {
+  font-weight: 600; /* not 700 */
+}
+
+button {
+  font-family: inherit;
+  font-weight: 500;
+}
+
+/* ===============================
+   Typography tuning (Graphik)
+================================ */
+
+:root {
+  /* softer “headline” color so bold doesn’t look harsh/black */
+  --title: rgba(255, 255, 255, 0.86);
+  --buttonText: rgba(255, 255, 255, 0.82);
+}
+
+/* Global default */
+body {
+  font-family: "Graphik", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-weight: 400;
+}
+
+/* Movie titles bigger than body */
+.cardTitle,
+.detailRight h2 {
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 600;     /* bold but not “black” */
+  color: var(--title);
+  letter-spacing: -0.01em;
+}
+
+/* Descriptions use Light weight */
+.card .muted,
+.detailRight .muted,
+.card p,
+.cardDescription {
+  font-weight: 300;     /* Graphik Light */
+  color: var(--muted);
+}
+
+/* Buttons: bold-ish, but same grey (not bright white) */
+.button,
+.navButton {
+  font-weight: 500;
+  color: var(--buttonText);
+}
+
+/* If any button text is still too harsh, force it */
+.button {
+  color: var(--buttonText) !important;
+}
+
+/* ===============================
+   Star Rating (consistent)
+================================ */
+
+.stars {
+  position: relative;
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 2px; /* spacing like letterboxd */
+  transform: translateY(1px);
+}
+
+.starsBack {
+  color: rgba(0, 0, 0, 0.85);         /* “black” empty stars */
+  text-shadow: 0 0 0 rgba(0,0,0,0.85);
+}
+
+.starsFront {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: rgba(200, 210, 220, 0.85);   /* grey filled stars */
+}
+
+/* Remove default browser spacing */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg); /* make sure the whole page is dark */
+}
+
+/* Prevent horizontal overflow */
+body {
+  overflow-x: hidden;
+}
+/* Page headings like "Popular" */
+.page > h2 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.navTitle {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Card layout adjustment */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Title on top */
+.cardTitleTop {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  text-align: left;
+  letter-spacing: -0.01em;
+}
+
+/* Poster + text row */
+.cardContentRow {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+/* Make description slightly lighter */
+.cardBody p {
+  font-weight: 300;
+}
+
+.cardTitleTop {
+  text-align: left;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.cardContentRow {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}

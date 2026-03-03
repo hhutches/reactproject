@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import StarRating from "../components/StarRating.jsx";
 import {
+  getMovieCredits,
   getMovieDetails,
   getMovieTrailer,
   tmdbPoster,
+  tmdbProfile,
 } from "../api/tmdb.js";
 
 export default function MovieDetail({
@@ -19,12 +22,37 @@ export default function MovieDetail({
 }) {
   const [movie, setMovie] = useState(null);
   const [trailerKey, setTrailerKey] = useState(null);
+  const [cast, setCast] = useState([]);
   const [err, setErr] = useState("");
 
   // Log form state
   const [logStars, setLogStars] = useState(existingLog?.rating ?? 0);
   const [logReview, setLogReview] = useState(existingLog?.review ?? "");
   const [savedMsg, setSavedMsg] = useState("");
+
+  // Cast scrolling
+  const castRowRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  function updateScrollButtons() {
+    const el = castRowRef.current;
+    if (!el) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+
+    const atLeft = scrollLeft <= 1;
+    const atRight = scrollLeft + clientWidth >= scrollWidth - 1;
+
+    setCanScrollLeft(!atLeft);
+    setCanScrollRight(!atRight && scrollWidth > clientWidth + 1);
+  }
+
+  function scrollCastBy(delta) {
+    const el = castRowRef.current;
+    if (!el) return;
+    el.scrollBy({ left: delta, behavior: "smooth" });
+  }
 
   useEffect(() => {
     setLogStars(existingLog?.rating ?? 0);
@@ -39,14 +67,18 @@ export default function MovieDetail({
 
       setErr("");
       try {
-        const [details, trailer] = await Promise.all([
+        const [details, trailer, credits] = await Promise.all([
           getMovieDetails(movieId),
           getMovieTrailer(movieId),
+          getMovieCredits(movieId),
         ]);
 
         if (!ignore) {
           setMovie(details);
           setTrailerKey(trailer);
+
+          // ✅ Keep MANY cast members so scrolling/arrows actually matter
+          setCast((credits?.cast || []).slice(0, 20));
         }
       } catch (e) {
         if (!ignore) setErr(e?.message || "Failed to load movie");
@@ -59,21 +91,30 @@ export default function MovieDetail({
     };
   }, [movieId]);
 
-  if (!movieId) {
-    return <p className="muted">No movie selected.</p>;
-  }
+  // Update scroll arrow visibility when cast loads, resizes, or scrolls
+  useEffect(() => {
+    updateScrollButtons();
 
-  if (!movie) {
-    return <p className="muted">Loading…</p>;
-  }
+    const onResize = () => updateScrollButtons();
+    window.addEventListener("resize", onResize);
 
-  const poster = movie.poster_path
-    ? tmdbPoster(movie.poster_path, "w500")
-    : "";
+    const el = castRowRef.current;
+    if (el) el.addEventListener("scroll", updateScrollButtons, { passive: true });
 
-  const year = movie.release_date
-    ? movie.release_date.slice(0, 4)
-    : "—";
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (el) el.removeEventListener("scroll", updateScrollButtons);
+    };
+  }, [cast.length]);
+
+  // Optional: hide the entire cast section if there's truly no cast
+  const hasCast = useMemo(() => cast && cast.length > 0, [cast]);
+
+  if (!movieId) return <p className="muted">No movie selected.</p>;
+  if (!movie) return <p className="muted">Loading…</p>;
+
+  const poster = movie.poster_path ? tmdbPoster(movie.poster_path, "w500") : "";
+  const year = movie.release_date ? movie.release_date.slice(0, 4) : "—";
 
   return (
     <div className="page">
@@ -86,11 +127,7 @@ export default function MovieDetail({
       <div className="detail">
         <div className="detailLeft">
           {poster ? (
-            <img
-              className="detailPoster"
-              src={poster}
-              alt={`${movie.title} poster`}
-            />
+            <img className="detailPoster" src={poster} alt={`${movie.title} poster`} />
           ) : (
             <div className="detailPosterFallback" />
           )}
@@ -98,73 +135,46 @@ export default function MovieDetail({
 
         <div className="detailRight">
           <h2>
-            {movie.title}{" "}
-            <span className="muted">({year})</span>
+            {movie.title} <span className="muted">({year})</span>
           </h2>
 
-          <p className="muted">
-            {movie.overview || "No overview available."}
-          </p>
+          <p className="muted">{movie.overview || "No overview available."}</p>
 
           <div className="detailActions">
             <button className="button" onClick={onToggleWatchlist}>
-              {inWatchlist
-                ? "Remove from watchlist"
-                : "Add to watchlist"}
+              {inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
             </button>
           </div>
 
-          {/* 🎬 Trailer Section */}
+          {/* 🎬 Trailer */}
           <hr className="divider" />
           <h3>Trailer</h3>
-
           {trailerKey ? (
-            <div style={{ marginTop: 10 }}>
+            <div className="trailerWrap" style={{ marginTop: 10 }}>
               <iframe
-                width="100%"
-                height="400"
                 src={`https://www.youtube.com/embed/${trailerKey}`}
                 title="Movie Trailer"
-                frameBorder="0"
                 allowFullScreen
-                style={{ borderRadius: 12 }}
               />
             </div>
           ) : (
             <p className="muted">No trailer available.</p>
           )}
 
-          {/* ⭐ Log Film Section */}
+          {/* ⭐ Log Film */}
           <hr className="divider" />
           <h3>Log this film</h3>
           <p className="muted">
-            This creates an entry in your Films tab.
+            Click stars to rate (click the same star again for a half-star) and optionally add a review.
           </p>
 
           <div className="reviewForm">
-            <label className="muted">
-              Rating (0–5):
-              <select
-                className="select"
-                value={logStars}
-                onChange={(e) =>
-                  setLogStars(Number(e.target.value))
-                }
-              >
-                {[0, 1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <StarRating value={logStars} onChange={setLogStars} label="Your rating" size={24} />
 
             <textarea
               className="textarea"
               value={logReview}
-              onChange={(e) =>
-                setLogReview(e.target.value)
-              }
+              onChange={(e) => setLogReview(e.target.value)}
               placeholder="Optional review…"
               rows={4}
             />
@@ -172,23 +182,22 @@ export default function MovieDetail({
             <button
               className="button"
               onClick={() => {
-                onLogFilm(movie, {
-                  rating: logStars,
-                  review: logReview.trim(),
-                });
+                onLogFilm(movie, { rating: logStars, review: logReview.trim() });
                 setSavedMsg("Logged!");
                 setTimeout(() => setSavedMsg(""), 1200);
               }}
+              disabled={logStars < 0 || logStars > 5}
             >
               {existingLog ? "Update log" : "Log film"}
             </button>
 
-            {savedMsg ? (
-              <p className="muted">{savedMsg}</p>
+            {savedMsg ? <p className="muted">{savedMsg}</p> : null}
+            {existingLog ? (
+              <p className="muted">You’ve already logged this film — updating will overwrite.</p>
             ) : null}
           </div>
 
-          {/* 📝 Optional Separate Reviews */}
+          {/* 📝 Reviews */}
           <hr className="divider" />
           <h3>Reviews</h3>
 
@@ -200,11 +209,7 @@ export default function MovieDetail({
                 <li key={r.id} className="reviewItem">
                   <div className="reviewMeta">
                     ★ {r.stars}{" "}
-                    <span className="muted">
-                      {new Date(
-                        r.createdAt
-                      ).toLocaleString()}
-                    </span>
+                    <span className="muted">{new Date(r.createdAt).toLocaleString()}</span>
                   </div>
                   <div>{r.text}</div>
                 </li>
@@ -215,16 +220,66 @@ export default function MovieDetail({
           <div style={{ marginTop: 10 }}>
             <button
               className="button small ghost"
-              onClick={() =>
-                onAddReview({
-                  text: "Sample review",
-                  stars: 4,
-                })
-              }
+              onClick={() => onAddReview({ text: "Sample review", stars: 4 })}
             >
               (Dev) Add sample review
             </button>
           </div>
+
+          {/* 🎭 Cast (bottom, scrollable, arrows both ways) */}
+          <hr className="divider" />
+          <h3>Cast</h3>
+
+          {hasCast ? (
+            <div className="castSection">
+              <div className="castRow" ref={castRowRef}>
+                {cast.map((p) => {
+                  const key = p.credit_id ?? p.cast_id ?? p.id;
+                  const img = p.profile_path ? tmdbProfile(p.profile_path, "w185") : "";
+
+                  return (
+                    <div className="castCard" key={key}>
+                      {img ? (
+                        <img className="castImg" src={img} alt={p.name} />
+                      ) : (
+                        <div className="castImgFallback" />
+                      )}
+                      <div className="castName">{p.name}</div>
+                      <div className="muted castRole">{p.character || "—"}</div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Left arrow (only if you can scroll left) */}
+              {canScrollLeft ? (
+                <button
+                  type="button"
+                  className="castScrollBtn left"
+                  aria-label="Scroll cast left"
+                  onClick={() => scrollCastBy(-360)}
+                  title="Scroll left"
+                >
+                  ←
+                </button>
+              ) : null}
+
+              {/* Right arrow (only if you can scroll right) */}
+              {canScrollRight ? (
+                <button
+                  type="button"
+                  className="castScrollBtn right"
+                  aria-label="Scroll cast right"
+                  onClick={() => scrollCastBy(360)}
+                  title="Scroll right"
+                >
+                  →
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            <p className="muted">No cast available.</p>
+          )}
         </div>
       </div>
     </div>

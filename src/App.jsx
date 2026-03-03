@@ -23,11 +23,11 @@ export default function App() {
   // Watchlist stores actual movie objects so it always renders
   const [watchlistById, setWatchlistById] = useState(() => ({}));
 
-  // ✅ Logged films (Letterboxd “Films” / diary-lite)
-  // logsById[movieId] = { rating: number (0-5), review: string, createdAt: string, movie: object }
+  // Logged films (Letterboxd “Films” tab)
+  // logsById[movieId] = { rating: number (0-5, can be half), review: string, createdAt: string, movie: object }
   const [logsById, setLogsById] = useState(() => ({}));
 
-  // Reviews (separate from logs; you can keep this or remove later)
+  // Optional separate reviews
   const [reviewsByMovie, setReviewsByMovie] = useState(() => ({}));
 
   function openMovie(movieId) {
@@ -57,18 +57,21 @@ export default function App() {
     }
   }
 
-  // ✅ Log a film (rating + optional review)
+  // ✅ Log a film (rating supports 0.5 increments)
   function logFilm(movieObj, { rating, review }) {
     if (!movieObj?.id) return;
     const id = movieObj.id;
 
+    // clamp rating 0..5 just in case
+    const safeRating = Math.max(0, Math.min(5, Number(rating)));
+
     setLogsById((prev) => ({
       ...prev,
       [id]: {
-        rating,
+        rating: safeRating,
         review: review || "",
         createdAt: new Date().toISOString(),
-        movie: movieObj, // store enough info to render list
+        movie: movieObj,
       },
     }));
   }
@@ -81,7 +84,6 @@ export default function App() {
     });
   }
 
-  // (optional) if you want separate reviews list still
   function addReview(movieId, { text, stars }) {
     if (!movieId) return;
     setReviewsByMovie((prev) => {
@@ -98,7 +100,7 @@ export default function App() {
     });
   }
 
-  // Average rating based on logged films (more “Letterboxd” than reviews)
+  // For Home: show a user rating value if logged
   const avgRatingByMovie = useMemo(() => {
     const out = {};
     for (const [movieId, entry] of Object.entries(logsById)) {
@@ -107,14 +109,15 @@ export default function App() {
     return out;
   }, [logsById]);
 
-  // Load popular on mount
+  // Load popular + fresh on mount
   useEffect(() => {
     let ignore = false;
     async function run() {
       setLoading(true);
       setErrorMsg("");
       try {
-        const data = await getPopularMovies();
+        // tweak these if you want even more "mainstream"
+        const data = await getPopularMovies({ monthsBack: 18, minVotes: 200 });
         if (!ignore) setMovies(data);
       } catch (e) {
         if (!ignore) setErrorMsg(e?.message || "Failed to load movies");
@@ -126,7 +129,7 @@ export default function App() {
     return () => { ignore = true; };
   }, []);
 
-  // Search on query change
+  // Search on query change (debounced). If blank, fallback to popular + fresh.
   useEffect(() => {
     let ignore = false;
     const t = setTimeout(async () => {
@@ -135,7 +138,7 @@ export default function App() {
       try {
         const data = query.trim()
           ? await searchMovies(query.trim())
-          : await getPopularMovies();
+          : await getPopularMovies({ monthsBack: 18, minVotes: 200 });
         if (!ignore) setMovies(data);
       } catch (e) {
         if (!ignore) setErrorMsg(e?.message || "Failed to load movies");
@@ -205,12 +208,8 @@ export default function App() {
           inWatchlist={inWatchlist}
           onToggleWatchlist={() => toggleWatchlist(selectedMovieId)}
           onBack={() => setPage("home")}
-
-          // ✅ logging feature
           existingLog={existingLog}
           onLogFilm={(movieObj, payload) => logFilm(movieObj, payload)}
-
-          // optional reviews
           reviews={reviewsByMovie[selectedMovieId] || []}
           onAddReview={(payload) => addReview(selectedMovieId, payload)}
         />
@@ -243,7 +242,6 @@ export default function App() {
 
         <aside className="rightRail">
           <div className="panel">
-            <h3 className="panelTitle">Stats</h3>
             <p className="muted">Logged films: {loggedFilms.length}</p>
             <p className="muted">Watchlist: {watchlistMovies.length}</p>
           </div>
